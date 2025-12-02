@@ -1,0 +1,26 @@
+{
+  "name": "trend-mcp",
+  "version": "1.0.0",
+  "description": "配信のコメント欄にニュースやトレンド情報を自動投稿するMCPサーバー",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "node-cron": "^3.0.0",
+    "rss-parser": "^3.13.0",
+    "node-fetch": "^3.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/node-cron": "^3.0.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -9,11 +9,25 @@
 - 設定したトピックに関連する情報を雑談ネタとして整形し、定期的にコメントする
 
 ### 技術スタック
-- **言語**: JavaScript
-- **MCP**: Model Context Protocol サーバーとして動作
+- **言語**: TypeScript
+- **ランタイム**: Node.js (v18+)
+- **MCP SDK**: @modelcontextprotocol/sdk（stdio通信）
+- **スケジューラ**: node-cron（サーバー内蔵、15分間隔）
 - **LLM**: Claude Code（ヘッドレスモード）でテキスト整形
+- **RSSパーサー**: rss-parser
+- **HTTPクライアント**: node-fetch
 - **ニュースソース**: Google News RSS
 - **投稿先**: Nightbot API
+
+### アーキテクチャ
+```
+┌─────────────────────────────┐
+│  MCPサーバー (stdio)         │
+│  ├─ MCP Tools               │
+│  └─ node-cron               │
+│      └─ claude --headless   │
+└─────────────────────────────┘
+```
 
 ---
 
@@ -64,14 +78,24 @@ Nightbot APIを通じてコメントを投稿する。
 - stdio通信でClaude Desktopや他のMCPクライアントと接続
 - ツールの提供とリソース管理
 
-### 定期実行機能
-- **実行間隔**: 15分ごと
-- **実行方法**: Claude Code ヘッドレスモード (`claude --headless`)
+### 定期実行機能（node-cron）
+- **実行間隔**: 15分ごと（`*/15 * * * *`）
+- **実行方法**: サーバープロセス内でnode-cronがClaude Code ヘッドレスモードを起動
 - **処理内容**:
   1. 設定されたトレンドトピックを確認
   2. Google News RSSから関連ニュースを取得
   3. Claudeでコメント用に文章を整形（短く、読みやすく）
   4. Nightbotに投稿
+
+```typescript
+// スケジューラ実装イメージ
+import cron from 'node-cron';
+import { exec } from 'child_process';
+
+cron.schedule('*/15 * * * *', async () => {
+  exec('claude --headless -p "トピックに関連するニュースを取得してNightbotに投稿"');
+});
+```
 
 ---
 
@@ -100,8 +124,7 @@ trend-server/
 │   │   ├── fetchNews.ts   # Google News RSS取得
 │   │   ├── nightbot.ts    # Nightbot投稿
 │   │   └── topics.ts      # トピック管理
-│   ├── scheduler/
-│   │   └── cron.ts        # 定期実行管理
+│   ├── scheduler.ts       # node-cron 定期実行
 │   └── utils/
 │       └── rss.ts         # RSSパーサー
 ├── config/
@@ -155,6 +178,7 @@ NIGHTBOT_ACCESS_TOKEN=xxx
 ## 開発ガイドライン
 
 ### コーディング規約
+- TypeScript strict mode 使用
 - ESLint + Prettier でフォーマット
 - エラーハンドリングは明示的に行う
 
