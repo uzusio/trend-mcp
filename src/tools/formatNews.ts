@@ -66,11 +66,9 @@ ${content}
 
 /**
  * 記事URLから内容を取得する
- * Google Newsのリダイレクトに対応
  */
 export async function fetchArticleContent(url: string): Promise<string> {
   try {
-    // Google Newsのリダイレクトを追跡
     const response = await fetch(url, {
       headers: {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -84,21 +82,58 @@ export async function fetchArticleContent(url: string): Promise<string> {
       return `記事の取得に失敗しました (${response.status})`;
     }
 
-    const finalUrl = response.url;
     const html = await response.text();
-
-    // HTMLからテキストを簡易抽出
     const textContent = extractTextFromHtml(html);
 
-    // 内容が少なすぎる場合（リダイレクトページなど）
     if (textContent.length < 100) {
-      return `記事の内容を取得できませんでした。リダイレクト先: ${finalUrl}`;
+      return `記事の内容を取得できませんでした`;
     }
 
-    // 最初の2000文字に制限
     return textContent.slice(0, 2000);
   } catch (error) {
     return `記事の取得エラー: ${error instanceof Error ? error.message : String(error)}`;
+  }
+}
+
+/**
+ * ニュースタイトルで検索して記事内容を取得する
+ * Google NewsのリダイレクトURLを使わず、タイトルで直接検索する方式
+ */
+export async function searchAndFetchArticle(title: string, source?: string): Promise<string> {
+  // ソース名を除去したタイトルで検索（" - ソース名"の部分を除く）
+  const cleanTitle = title.replace(/ - [^-]+$/, "").trim();
+  const searchQuery = source ? `${cleanTitle} ${source}` : cleanTitle;
+
+  // DuckDuckGo HTML検索を使用（APIキー不要）
+  const searchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(searchQuery)}`;
+
+  try {
+    const searchResponse = await fetch(searchUrl, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+      },
+    });
+
+    if (!searchResponse.ok) {
+      return `検索に失敗しました (${searchResponse.status})`;
+    }
+
+    const searchHtml = await searchResponse.text();
+
+    // DuckDuckGoの検索結果からURLを抽出
+    // 形式: href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fexample.com%2F..."
+    const uddgMatch = searchHtml.match(/uddg=([^&"]+)/);
+    if (!uddgMatch) {
+      return `検索結果からURLを取得できませんでした`;
+    }
+
+    const articleUrl = decodeURIComponent(uddgMatch[1]);
+    console.error(`検索結果URL: ${articleUrl}`);
+
+    // 記事を取得
+    return await fetchArticleContent(articleUrl);
+  } catch (error) {
+    return `検索エラー: ${error instanceof Error ? error.message : String(error)}`;
   }
 }
 
@@ -140,7 +175,7 @@ export function isValidArticleContent(content: string): boolean {
 
 /**
  * ニュース一覧から記事本文を取得できるものを探す
- * 最初に成功したものを返す
+ * タイトルで検索して記事を取得する方式
  */
 export async function fetchFirstValidArticle(
   newsList: NewsItem[],
@@ -152,7 +187,8 @@ export async function fetchFirstValidArticle(
     const news = newsList[i];
     console.error(`記事取得を試行中 (${i + 1}/${attempts}): ${news.title.slice(0, 30)}...`);
 
-    const content = await fetchArticleContent(news.url);
+    // タイトルで検索して記事を取得
+    const content = await searchAndFetchArticle(news.title, news.source);
 
     if (isValidArticleContent(content)) {
       console.error(`記事取得成功: ${news.title.slice(0, 30)}...`);
