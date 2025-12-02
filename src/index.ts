@@ -11,18 +11,13 @@ import { getTrendTopics, setTrendTopics, SetTrendTopicsArgs } from "./tools/topi
 const TOOLS = [
   {
     name: "fetch_news",
-    description: "Google News RSSからニュースを取得する",
+    description: "Google News RSSからキーワードでニュースを検索する",
     inputSchema: {
       type: "object" as const,
       properties: {
-        category: {
-          type: "string",
-          enum: ["national", "world", "business", "tech", "entertainment", "sports"],
-          description: "ニュースカテゴリ",
-        },
         keyword: {
           type: "string",
-          description: "検索キーワード（オプション）",
+          description: "検索キーワード（トピック）",
         },
         limit: {
           type: "number",
@@ -30,7 +25,7 @@ const TOOLS = [
           default: 5,
         },
       },
-      required: ["category"],
+      required: ["keyword"],
     },
   },
   {
