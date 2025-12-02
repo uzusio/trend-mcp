@@ -4,6 +4,7 @@ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
+import { fetchNews, FetchNewsArgs } from "./tools/fetchNews.js";
 
 // ツール定義
 const TOOLS = [
@@ -94,12 +95,13 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
   switch (name) {
     case "fetch_news": {
-      // TODO: Issue #2 で実装
+      const newsArgs = args as unknown as FetchNewsArgs;
+      const news = await fetchNews(newsArgs);
       return {
         content: [
           {
             type: "text",
-            text: JSON.stringify({ message: "fetch_news is not implemented yet" }),
+            text: JSON.stringify(news, null, 2),
           },
         ],
       };
