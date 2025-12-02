@@ -37,3 +37,7 @@ config/scheduler.pid
 
 # Test files
 test/
+
+# Claude Code local settings
+.claude/settings.json
+.claude/settings.local.json
