@@ -5,6 +5,7 @@ import {
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { fetchNews, FetchNewsArgs } from "./tools/fetchNews.js";
+import { getTrendTopics, setTrendTopics, SetTrendTopicsArgs } from "./tools/topics.js";
 
 // ツール定義
 const TOOLS = [
@@ -120,24 +121,25 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }
 
     case "get_trend_topics": {
-      // TODO: Issue #4 で実装
+      const topics = await getTrendTopics();
       return {
         content: [
           {
             type: "text",
-            text: JSON.stringify({ message: "get_trend_topics is not implemented yet" }),
+            text: JSON.stringify({ topics }, null, 2),
           },
         ],
       };
     }
 
     case "set_trend_topics": {
-      // TODO: Issue #4 で実装
+      const topicsArgs = args as unknown as SetTrendTopicsArgs;
+      const updatedTopics = await setTrendTopics(topicsArgs);
       return {
         content: [
           {
             type: "text",
-            text: JSON.stringify({ message: "set_trend_topics is not implemented yet" }),
+            text: JSON.stringify({ topics: updatedTopics }, null, 2),
           },
         ],
       };
