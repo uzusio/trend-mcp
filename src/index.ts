@@ -7,7 +7,7 @@ import {
 import { fetchNews, FetchNewsArgs } from "./tools/fetchNews.js";
 import { getTrendTopics, setTrendTopics, SetTrendTopicsArgs, getRandomTopics, buildOrQuery } from "./tools/topics.js";
 import { postToNightbot, PostToNightbotArgs } from "./tools/nightbot.js";
-import { getMakotoPrompt, buildFormatPrompt, fetchArticleContent } from "./tools/formatNews.js";
+import { getMakotoPrompt, buildFormatPrompt, fetchArticleContent, fetchFirstValidArticle } from "./tools/formatNews.js";
 import { NewsItem } from "./utils/rss.js";
 
 // ツール定義
@@ -142,6 +142,35 @@ const TOOLS = [
         },
       },
       required: ["news", "articleContent"],
+    },
+  },
+  {
+    name: "fetch_first_valid_article",
+    description: "ニュース一覧から記事本文を取得できる最初の記事を探す。取得できない場合は次の候補を試す。",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        newsList: {
+          type: "array",
+          description: "ニュース一覧（fetch_newsの結果）",
+          items: {
+            type: "object",
+            properties: {
+              title: { type: "string" },
+              url: { type: "string" },
+              pubDate: { type: "string" },
+              source: { type: "string" },
+              description: { type: "string" },
+            },
+          },
+        },
+        maxAttempts: {
+          type: "number",
+          description: "最大試行回数（デフォルト: 5）",
+          default: 5,
+        },
+      },
+      required: ["newsList"],
     },
   },
 ];
@@ -280,6 +309,19 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           {
             type: "text",
             text: formatPrompt,
+          },
+        ],
+      };
+    }
+
+    case "fetch_first_valid_article": {
+      const { newsList, maxAttempts } = args as { newsList: NewsItem[]; maxAttempts?: number };
+      const result = await fetchFirstValidArticle(newsList, maxAttempts);
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(result, null, 2),
           },
         ],
       };

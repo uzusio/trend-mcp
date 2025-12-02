@@ -16,6 +16,12 @@ export interface FormattedNews {
   formatted: string;
 }
 
+export interface ArticleFetchResult {
+  success: boolean;
+  content: string;
+  news: NewsItem;
+}
+
 /**
  * まことちゃんのプロンプトを読み込む
  */
@@ -115,4 +121,58 @@ function extractTextFromHtml(html: string): string {
   text = text.replace(/&quot;/g, '"');
 
   return text.trim();
+}
+
+/**
+ * 記事内容の取得が成功したかどうかを判定
+ */
+export function isValidArticleContent(content: string): boolean {
+  // エラーメッセージで始まる場合は失敗
+  if (content.startsWith("記事の取得") || content.startsWith("記事の内容")) {
+    return false;
+  }
+  // 内容が短すぎる場合も失敗
+  if (content.length < 100) {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * ニュース一覧から記事本文を取得できるものを探す
+ * 最初に成功したものを返す
+ */
+export async function fetchFirstValidArticle(
+  newsList: NewsItem[],
+  maxAttempts: number = 5
+): Promise<ArticleFetchResult> {
+  const attempts = Math.min(maxAttempts, newsList.length);
+
+  for (let i = 0; i < attempts; i++) {
+    const news = newsList[i];
+    console.error(`記事取得を試行中 (${i + 1}/${attempts}): ${news.title.slice(0, 30)}...`);
+
+    const content = await fetchArticleContent(news.url);
+
+    if (isValidArticleContent(content)) {
+      console.error(`記事取得成功: ${news.title.slice(0, 30)}...`);
+      return {
+        success: true,
+        content,
+        news,
+      };
+    }
+
+    console.error(`記事取得失敗、次の候補を試します...`);
+  }
+
+  // すべて失敗した場合、最初の記事をdescriptionで返す
+  const fallbackNews = newsList[0];
+  console.error(`すべての記事取得に失敗。タイトルと概要で代替します。`);
+
+  return {
+    success: false,
+    content: fallbackNews.description || fallbackNews.title,
+    news: fallbackNews,
+  };
 }

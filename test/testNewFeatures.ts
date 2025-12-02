@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { getRandomTopics, buildOrQuery } from "../src/tools/topics.js";
 import { fetchNews } from "../src/tools/fetchNews.js";
-import { getMakotoPrompt, buildFormatPrompt, fetchArticleContent } from "../src/tools/formatNews.js";
+import { getMakotoPrompt, buildFormatPrompt, fetchFirstValidArticle } from "../src/tools/formatNews.js";
 
 async function main() {
   console.log("=== テスト: 新機能 ===\n");
@@ -31,11 +31,13 @@ async function main() {
     return;
   }
 
-  // 4. 記事内容取得
-  console.log("\n4. 記事内容取得（最初の記事）");
-  const articleContent = await fetchArticleContent(news[0].url);
-  console.log("記事内容（先頭500文字）:");
-  console.log(articleContent.slice(0, 500) + "...");
+  // 4. 記事内容取得（複数候補から有効なものを探す）
+  console.log("\n4. 記事内容取得（複数候補から有効なものを探す）");
+  const articleResult = await fetchFirstValidArticle(news, 5);
+  console.log("取得結果:", articleResult.success ? "成功" : "フォールバック");
+  console.log("選択された記事:", articleResult.news.title.slice(0, 50) + "...");
+  console.log("記事内容（先頭300文字）:");
+  console.log(articleResult.content.slice(0, 300) + "...");
 
   // 5. まことちゃんプロンプト
   console.log("\n5. まことちゃんプロンプト確認");
@@ -44,7 +46,7 @@ async function main() {
 
   // 6. 整形プロンプト生成
   console.log("\n6. 整形プロンプト生成");
-  const formatPrompt = buildFormatPrompt(makotoPrompt, news[0], articleContent);
+  const formatPrompt = buildFormatPrompt(makotoPrompt, articleResult.news, articleResult.content);
   console.log("整形プロンプト（先頭300文字）:");
   console.log(formatPrompt.slice(0, 300) + "...");
 
