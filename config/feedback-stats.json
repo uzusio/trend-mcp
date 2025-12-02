@@ -1,5 +1,21 @@
 {
-  "good": 0,
+  "good": 3,
   "bad": 0,
-  "history": []
+  "history": [
+    {
+      "timestamp": "2025-12-02T19:23:34.497Z",
+      "rating": "good",
+      "newsTitle": "RFN 2XKO イベント開催（ハイタニ・ネモら24名参加）"
+    },
+    {
+      "timestamp": "2025-12-02T19:21:09.640Z",
+      "rating": "good",
+      "newsTitle": "LoL 2026シーズン1大型アップデート（ロールクエスト導入）"
+    },
+    {
+      "timestamp": "2025-12-02T19:01:23.731Z",
+      "rating": "good",
+      "newsTitle": "『League of Legends』のWASD操作、12月3日にとうとう正式実装"
+    }
+  ]
 }
