@@ -1,3 +1,5 @@
+import { getValidAccessToken } from "../auth/nightbot.js";
+
 export interface PostToNightbotArgs {
   message: string;
 }
@@ -10,12 +12,13 @@ export interface NightbotResult {
 export async function postToNightbot(args: PostToNightbotArgs): Promise<NightbotResult> {
   const { message } = args;
 
-  const accessToken = process.env.NIGHTBOT_ACCESS_TOKEN;
-
-  if (!accessToken) {
+  let accessToken: string;
+  try {
+    accessToken = await getValidAccessToken();
+  } catch (error) {
     return {
       success: false,
-      message: "NIGHTBOT_ACCESS_TOKEN is not set",
+      message: error instanceof Error ? error.message : "Failed to get access token",
     };
   }
 
