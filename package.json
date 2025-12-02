@@ -13,7 +13,9 @@
     "scheduler": "node dist/schedulerCli.js",
     "scheduler:start": "node dist/schedulerCli.js start",
     "scheduler:stop": "node dist/schedulerCli.js stop",
-    "scheduler:status": "node dist/schedulerCli.js status"
+    "scheduler:status": "node dist/schedulerCli.js status",
+    "post": "claude -p \"/post-trend\" --mcp-config .mcp.json --permission-mode bypassPermissions",
+    "feedback-bad": "claude -p \"/feedback-bad\" --mcp-config .mcp.json --permission-mode bypassPermissions"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
