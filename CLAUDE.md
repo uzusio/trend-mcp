@@ -210,6 +210,26 @@ NIGHTBOT_ACCESS_TOKEN=xxx
 
 ---
 
+## タスク管理
+
+### GitHub Projects
+- プロジェクトボード: `Trend MCP Server` (ID: 4)
+- 新規IssueはProjectボードに追加すること
+
+### Issue作成
+```bash
+# Issueを作成してProjectボードに追加
+/issue <タイトル>
+```
+
+スラッシュコマンド `/issue` を使用するか、手動で以下を実行：
+```bash
+gh issue create --repo uzusio/trend-mcp --title "<タイトル>" --body "<内容>" --label "enhancement"
+gh project item-add 4 --owner uzusio --url <issue-url>
+```
+
+---
+
 ## 開発ガイドライン
 
 ### コード品質と職務意識
