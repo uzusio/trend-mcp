@@ -28,3 +28,12 @@ npm-debug.log*
 
 # Test coverage
 coverage/
+
+# Local MCP config
+.mcp.json
+
+# Scheduler PID
+config/scheduler.pid
+
+# Test files
+test/

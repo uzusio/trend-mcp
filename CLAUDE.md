@@ -132,14 +132,14 @@ OBSプラグイン「Advanced Scene Switcher」を使って、配信開始/終�
 ```
 名前: Start Trend Scheduler
 条件: Streaming → Started
-アクション: Run → node c:/work/trend-mcp/dist/schedulerCli.js start
+アクション: Run → Path: c:\work\trend-mcp\scripts\scheduler-start.bat
 ```
 
 **マクロ2: 配信終了時**
 ```
 名前: Stop Trend Scheduler
 条件: Streaming → Stopped
-アクション: Run → node c:/work/trend-mcp/dist/schedulerCli.js stop
+アクション: Run → Path: c:\work\trend-mcp\scripts\scheduler-stop.bat
 ```
 
 #### 動作確認
