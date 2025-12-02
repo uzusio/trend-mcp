@@ -6,6 +6,7 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { fetchNews, FetchNewsArgs } from "./tools/fetchNews.js";
 import { getTrendTopics, setTrendTopics, SetTrendTopicsArgs } from "./tools/topics.js";
+import { postToNightbot, PostToNightbotArgs } from "./tools/nightbot.js";
 
 // ツール定義
 const TOOLS = [
@@ -104,12 +105,13 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }
 
     case "post_to_nightbot": {
-      // TODO: Issue #3 で実装
+      const nightbotArgs = args as unknown as PostToNightbotArgs;
+      const result = await postToNightbot(nightbotArgs);
       return {
         content: [
           {
             type: "text",
-            text: JSON.stringify({ message: "post_to_nightbot is not implemented yet" }),
+            text: JSON.stringify(result, null, 2),
           },
         ],
       };
