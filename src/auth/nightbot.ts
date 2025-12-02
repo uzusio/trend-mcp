@@ -210,13 +210,6 @@ export async function startAuthServer(): Promise<void> {
   });
 }
 
-// CLIとして実行された場合
-const isMain = import.meta.url.endsWith("nightbot.ts") || import.meta.url.endsWith("nightbot.js");
-if (isMain) {
-  startAuthServer()
-    .then(() => process.exit(0))
-    .catch((err) => {
-      console.error("Authentication failed:", err);
-      process.exit(1);
-    });
-}
+// CLIとして実行された場合のみ認証サーバーを起動
+// このファイルはエクスポート用のモジュールとして使用されるため、
+// 認証サーバーの起動は別のエントリポイント（authEntry.ts）から行う
