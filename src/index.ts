@@ -8,6 +8,7 @@ import { fetchNews, FetchNewsArgs } from "./tools/fetchNews.js";
 import { getTrendTopics, setTrendTopics, SetTrendTopicsArgs, getRandomTopics, buildOrQuery } from "./tools/topics.js";
 import { postToNightbot, PostToNightbotArgs } from "./tools/nightbot.js";
 import { getMakotoPrompt, buildFormatPrompt, fetchArticleContent, fetchFirstValidArticle } from "./tools/formatNews.js";
+import { recordFeedback, getFeedbackStats, getPostHistory, RecordFeedbackArgs } from "./tools/feedback.js";
 import { NewsItem } from "./utils/rss.js";
 
 // ツール定義
@@ -173,6 +174,51 @@ const TOOLS = [
       required: ["newsList"],
     },
   },
+  {
+    name: "record_feedback",
+    description: "ニュース選択に対するフィードバックを記録する",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        rating: {
+          type: "string",
+          enum: ["good", "bad"],
+          description: "評価（good または bad）",
+        },
+        reason: {
+          type: "string",
+          description: "理由（任意）",
+        },
+        newsTitle: {
+          type: "string",
+          description: "対象のニュースタイトル（任意）",
+        },
+      },
+      required: ["rating"],
+    },
+  },
+  {
+    name: "get_feedback_stats",
+    description: "フィードバック統計を取得する",
+    inputSchema: {
+      type: "object" as const,
+      properties: {},
+    },
+  },
+  {
+    name: "get_post_history",
+    description: "投稿履歴を取得する",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        limit: {
+          type: "number",
+          description: "取得件数（デフォルト: 10）",
+          default: 10,
+        },
+      },
+    },
+  },
 ];
 
 // MCPサーバーの作成
@@ -322,6 +368,44 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           {
             type: "text",
             text: JSON.stringify(result, null, 2),
+          },
+        ],
+      };
+    }
+
+    case "record_feedback": {
+      const feedbackArgs = args as unknown as RecordFeedbackArgs;
+      const result = await recordFeedback(feedbackArgs);
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(result, null, 2),
+          },
+        ],
+      };
+    }
+
+    case "get_feedback_stats": {
+      const stats = await getFeedbackStats();
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(stats, null, 2),
+          },
+        ],
+      };
+    }
+
+    case "get_post_history": {
+      const limit = (args as { limit?: number }).limit ?? 10;
+      const history = await getPostHistory(limit);
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(history, null, 2),
           },
         ],
       };

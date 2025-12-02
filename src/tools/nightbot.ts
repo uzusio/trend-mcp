@@ -1,4 +1,5 @@
 import { getValidAccessToken } from "../auth/nightbot.js";
+import { logPost } from "../utils/logger.js";
 
 export interface PostToNightbotArgs {
   message: string;
@@ -47,11 +48,17 @@ export async function postToNightbot(args: PostToNightbotArgs): Promise<Nightbot
       };
     }
 
+    // 投稿成功をログに記録
+    await logPost(message, true);
+
     return {
       success: true,
       message: "Message posted successfully",
     };
   } catch (error) {
+    // 投稿失敗もログに記録
+    await logPost(message, false);
+
     return {
       success: false,
       message: `Failed to post message: ${error instanceof Error ? error.message : String(error)}`,
