@@ -24,3 +24,20 @@ export async function setTrendTopics(args: SetTrendTopicsArgs): Promise<string[]
   await writeFile(TOPICS_FILE, JSON.stringify(config, null, 2), "utf-8");
   return args.topics;
 }
+
+/**
+ * トピック一覧からランダムに指定数を選択する
+ */
+export async function getRandomTopics(count: number = 3): Promise<string[]> {
+  const topics = await getTrendTopics();
+  const shuffled = [...topics].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, Math.min(count, topics.length));
+}
+
+/**
+ * トピック配列をOR検索クエリに変換する
+ * 例: ["ゲーム", "VTuber", "科学"] -> "ゲーム OR VTuber OR 科学"
+ */
+export function buildOrQuery(topics: string[]): string {
+  return topics.join(" OR ");
+}

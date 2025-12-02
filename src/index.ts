@@ -5,8 +5,10 @@ import {
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { fetchNews, FetchNewsArgs } from "./tools/fetchNews.js";
-import { getTrendTopics, setTrendTopics, SetTrendTopicsArgs } from "./tools/topics.js";
+import { getTrendTopics, setTrendTopics, SetTrendTopicsArgs, getRandomTopics, buildOrQuery } from "./tools/topics.js";
 import { postToNightbot, PostToNightbotArgs } from "./tools/nightbot.js";
+import { getMakotoPrompt, buildFormatPrompt, fetchArticleContent } from "./tools/formatNews.js";
+import { NewsItem } from "./utils/rss.js";
 
 // ツール定義
 const TOOLS = [
@@ -64,6 +66,82 @@ const TOOLS = [
         },
       },
       required: ["topics"],
+    },
+  },
+  {
+    name: "get_random_topics",
+    description: "トピック一覧からランダムに指定数を選択する",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        count: {
+          type: "number",
+          description: "選択するトピック数（デフォルト: 3）",
+          default: 3,
+        },
+      },
+    },
+  },
+  {
+    name: "build_or_query",
+    description: "トピック配列をOR検索クエリに変換する（例: 'ゲーム OR VTuber OR 科学'）",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        topics: {
+          type: "array",
+          items: { type: "string" },
+          description: "トピックの配列",
+        },
+      },
+      required: ["topics"],
+    },
+  },
+  {
+    name: "get_makoto_prompt",
+    description: "まことちゃんのキャラクタープロンプトを取得する",
+    inputSchema: {
+      type: "object" as const,
+      properties: {},
+    },
+  },
+  {
+    name: "fetch_article_content",
+    description: "ニュース記事のURLから内容を取得する",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        url: {
+          type: "string",
+          description: "記事のURL",
+        },
+      },
+      required: ["url"],
+    },
+  },
+  {
+    name: "build_format_prompt",
+    description: "ニュース記事をまことちゃんのコメント形式に整形するためのプロンプトを生成する",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        news: {
+          type: "object",
+          description: "ニュース情報（title, url, pubDate, source）",
+          properties: {
+            title: { type: "string" },
+            url: { type: "string" },
+            pubDate: { type: "string" },
+            source: { type: "string" },
+          },
+          required: ["title", "url", "pubDate"],
+        },
+        articleContent: {
+          type: "string",
+          description: "記事の本文内容",
+        },
+      },
+      required: ["news", "articleContent"],
     },
   },
 ];
@@ -137,6 +215,71 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           {
             type: "text",
             text: JSON.stringify({ topics: updatedTopics }, null, 2),
+          },
+        ],
+      };
+    }
+
+    case "get_random_topics": {
+      const count = (args as { count?: number }).count ?? 3;
+      const randomTopics = await getRandomTopics(count);
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify({ topics: randomTopics }, null, 2),
+          },
+        ],
+      };
+    }
+
+    case "build_or_query": {
+      const topicsForQuery = (args as { topics: string[] }).topics;
+      const query = buildOrQuery(topicsForQuery);
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify({ query }, null, 2),
+          },
+        ],
+      };
+    }
+
+    case "get_makoto_prompt": {
+      const prompt = await getMakotoPrompt();
+      return {
+        content: [
+          {
+            type: "text",
+            text: prompt,
+          },
+        ],
+      };
+    }
+
+    case "fetch_article_content": {
+      const url = (args as { url: string }).url;
+      const content = await fetchArticleContent(url);
+      return {
+        content: [
+          {
+            type: "text",
+            text: content,
+          },
+        ],
+      };
+    }
+
+    case "build_format_prompt": {
+      const { news, articleContent } = args as { news: NewsItem; articleContent: string };
+      const makotoPrompt = await getMakotoPrompt();
+      const formatPrompt = buildFormatPrompt(makotoPrompt, news, articleContent);
+      return {
+        content: [
+          {
+            type: "text",
+            text: formatPrompt,
           },
         ],
       };
