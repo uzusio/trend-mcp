@@ -9,7 +9,11 @@
     "start": "node dist/index.js",
     "dev": "tsc --watch",
     "test": "tsx test/fetchNews.test.ts",
-    "auth": "tsx src/auth/authEntry.ts"
+    "auth": "tsx src/auth/authEntry.ts",
+    "scheduler": "node dist/schedulerCli.js",
+    "scheduler:start": "node dist/schedulerCli.js start",
+    "scheduler:stop": "node dist/schedulerCli.js stop",
+    "scheduler:status": "node dist/schedulerCli.js status"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",

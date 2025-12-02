@@ -87,13 +87,18 @@ Nightbot APIを通じてコメントを投稿する。
   3. Claudeでコメント用に文章を整形（短く、読みやすく）
   4. Nightbotに投稿
 
+```bash
+# ヘッドレス実行コマンド（スラッシュコマンド使用）
+claude -p "/post-trend" --mcp-config .mcp.json --permission-mode bypassPermissions
+```
+
 ```typescript
 // スケジューラ実装イメージ
 import cron from 'node-cron';
 import { exec } from 'child_process';
 
 cron.schedule('*/15 * * * *', async () => {
-  exec('claude --headless -p "トピックに関連するニュースを取得してNightbotに投稿"');
+  exec('claude -p "/post-trend" --mcp-config .mcp.json --permission-mode bypassPermissions');
 });
 ```
 
@@ -101,16 +106,46 @@ cron.schedule('*/15 * * * *', async () => {
 
 ## 配信連携
 
-### 配信開始検知
-OBS側のプラグイン/スクリプトで配信開始を検知し、サーバーに通知する。
+### スケジューラCLI
 
-**検知時に実行する処理:**
-- トレンドサーバーの定期実行を開始
-- その他の配信連携ツールの起動（将来的に拡張可能）
+スケジューラの手動制御：
+```bash
+npm run scheduler:start   # スケジューラをバックグラウンド起動
+npm run scheduler:stop    # スケジューラを停止
+npm run scheduler:status  # 実行状態を確認
+```
 
-### 配信終了検知
-- 定期実行を停止
-- 連携ツールの終了
+### OBS連携（Advanced Scene Switcher）
+
+OBSプラグイン「Advanced Scene Switcher」を使って、配信開始/終了時に自動でスケジューラを制御する。
+
+#### インストール
+1. OBS → ツール → プラグインマネージャー から「Advanced Scene Switcher」をインストール
+2. または公式サイトからダウンロード: https://obsproject.com/forum/resources/advanced-scene-switcher.395/
+
+#### 設定手順
+1. OBS → ツール → Advanced Scene Switcher を開く
+2. 「Macro」タブを選択
+3. 以下の2つのマクロを作成:
+
+**マクロ1: 配信開始時**
+```
+名前: Start Trend Scheduler
+条件: Streaming → Started
+アクション: Run → node c:/work/trend-mcp/dist/schedulerCli.js start
+```
+
+**マクロ2: 配信終了時**
+```
+名前: Stop Trend Scheduler
+条件: Streaming → Stopped
+アクション: Run → node c:/work/trend-mcp/dist/schedulerCli.js stop
+```
+
+#### 動作確認
+1. OBSで配信を開始 → スケジューラが自動起動
+2. `npm run scheduler:status` で確認
+3. 配信を終了 → スケジューラが自動停止
 
 ---
 
