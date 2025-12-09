@@ -7,7 +7,7 @@
 - Google News RSSからトレンドニュースを取得
 - Claude Codeでキャラクター風に文章を整形
 - Nightbot APIを通じて配信コメント欄に投稿
-- OBS連携で配信開始/終了時に自動でスケジューラを制御
+- OBS連携で配信中に定期的に自動投稿
 
 ## 必要要件
 
@@ -70,14 +70,33 @@ npm run scheduler:stop    # スケジューラ停止
 npm run scheduler:status  # 状態確認
 ```
 
-### OBS連携
+### OBS連携（定期投稿）
 
-OBS Advanced Scene Switcherを使用して、配信開始/終了時にスケジューラを自動制御できます。
+OBS Advanced Scene Switcherを使用して、配信中に定期的にニュースを投稿できます。
 
-1. Advanced Scene Switcherをインストール
-2. 以下のマクロを作成：
-   - 配信開始時: `scripts/scheduler-start.bat` を実行
-   - 配信終了時: `scripts/scheduler-stop.bat` を実行
+#### セットアップ
+
+1. **Advanced Scene Switcherをインストール**
+   - OBS → ツール → プラグインマネージャー から「Advanced Scene Switcher」をインストール
+   - または [公式サイト](https://obsproject.com/forum/resources/advanced-scene-switcher.395/) からダウンロード
+
+2. **マクロを作成**
+   - OBS → ツール → Advanced Scene Switcher を開く
+   - 「Macro」タブを選択
+   - 「+」ボタンで新規マクロを作成
+
+3. **マクロ設定**
+   ```
+   名前: Trend News Post
+   条件: Timer → Periodic（例: 15分間隔）
+        + Streaming → Started（配信中のみ実行）
+   アクション: Run → scripts/post.vbs のフルパスを指定
+   ```
+
+#### 動作
+- 配信中、設定した間隔で `scripts/post.vbs` が実行される
+- VBSがバックグラウンドで `npm run post` を呼び出し、ニュースを投稿
+- ウィンドウが表示されないため配信の邪魔にならない
 
 ## MCPツール一覧
 
