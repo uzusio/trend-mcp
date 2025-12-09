@@ -1,3 +1,3 @@
 @echo off
-cd /d "c:\work\trend-mcp"
+cd /d "%~dp0.."
 start /min "Trend MCP Scheduler" node dist\scheduler.js

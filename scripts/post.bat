@@ -1,3 +1,3 @@
 @echo off
-cd /d c:\work\trend-mcp
+cd /d "%~dp0.."
 start /b cmd /c "npm run post >nul 2>&1"

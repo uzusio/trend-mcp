@@ -1,4 +1,5 @@
 @echo off
+cd /d "%~dp0.."
 taskkill /fi "WINDOWTITLE eq Trend MCP Scheduler*" /f >nul 2>&1
-if exist "c:\work\trend-mcp\config\scheduler.pid" del "c:\work\trend-mcp\config\scheduler.pid"
+if exist "config\scheduler.pid" del "config\scheduler.pid"
 echo Scheduler stopped.
