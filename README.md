@@ -28,12 +28,21 @@ npm run build
 
 ### 2. Nightbot認証
 
-```bash
-npm run auth
-```
+1. [Nightbot Developer Portal](https://nightbot.tv/account/applications) でアプリを作成
+   - Redirect URI: `http://localhost:3000/callback`
 
-ブラウザが開くので、Nightbotアカウントで認証してください。
-トークンは `config/nightbot-token.json` に保存されます。
+2. `.env` ファイルを作成し、取得したクライアント情報を設定：
+   ```
+   NIGHTBOT_CLIENT_ID=your_client_id
+   NIGHTBOT_CLIENT_SECRET=your_client_secret
+   ```
+
+3. 認証を実行：
+   ```bash
+   npm run auth
+   ```
+   ブラウザが開くので、Nightbotアカウントで認証してください。
+   トークンは `config/credentials.json` に保存されます。
 
 ### 3. トピック設定
 
