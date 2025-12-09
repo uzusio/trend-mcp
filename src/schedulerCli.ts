@@ -53,6 +53,7 @@ async function start(): Promise<void> {
     detached: true,
     stdio: "ignore",
     cwd: join(__dirname, ".."),
+    windowsHide: true, // Windows でコンソールウィンドウを非表示にする
   });
 
   child.unref();

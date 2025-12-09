@@ -88,18 +88,11 @@ Nightbot APIを通じてコメントを投稿する。
   4. Nightbotに投稿
 
 ```bash
-# ヘッドレス実行コマンド（スラッシュコマンド使用）
-claude -p "/post-trend" --mcp-config .mcp.json --permission-mode bypassPermissions
-```
+# 手動で1回投稿（推奨）
+npm run post
 
-```typescript
-// スケジューラ実装イメージ
-import cron from 'node-cron';
-import { exec } from 'child_process';
-
-cron.schedule('*/15 * * * *', async () => {
-  exec('claude -p "/post-trend" --mcp-config .mcp.json --permission-mode bypassPermissions');
-});
+# フィードバック（悪い評価）
+npm run feedback-bad
 ```
 
 ---

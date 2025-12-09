@@ -25,8 +25,8 @@ const TOOLS = [
         },
         limit: {
           type: "number",
-          description: "取得件数（デフォルト: 5）",
-          default: 5,
+          description: "取得件数（デフォルト: 20）",
+          default: 20,
         },
       },
       required: ["keyword"],

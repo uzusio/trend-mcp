@@ -13,7 +13,7 @@ export interface NewsItem {
 
 export async function fetchGoogleNews(
   keyword: string,
-  limit: number = 5
+  limit: number = 20
 ): Promise<NewsItem[]> {
   const encodedKeyword = encodeURIComponent(keyword);
   const url = `https://news.google.com/rss/search?q=${encodedKeyword}&hl=ja&gl=JP&ceid=JP:ja`;

@@ -1,7 +1,13 @@
 {
   "good": 3,
-  "bad": 0,
+  "bad": 1,
   "history": [
+    {
+      "timestamp": "2025-12-03T07:20:53.362Z",
+      "rating": "bad",
+      "reason": "商品の宣伝だから",
+      "newsTitle": "ニーアオートマタ 2B「白の契約」スマートトイ・ライトリングスタンド発売"
+    },
     {
       "timestamp": "2025-12-02T19:23:34.497Z",
       "rating": "good",

@@ -6,6 +6,6 @@ export interface FetchNewsArgs {
 }
 
 export async function fetchNews(args: FetchNewsArgs): Promise<NewsItem[]> {
-  const { keyword, limit = 5 } = args;
+  const { keyword, limit = 20 } = args;
   return fetchGoogleNews(keyword, limit);
 }
